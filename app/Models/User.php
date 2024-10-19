@@ -3,13 +3,19 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Models\Manga;
+use App\Models\Coupon;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Laravel\Sanctum\HasApiTokens;
+use Spatie\Permission\Traits\HasRoles;
+use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Tymon\JWTAuth\Contracts\JWTSubject;
 
-class User extends Authenticatable
+class User extends Authenticatable implements JWTSubject
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
 
     /**
@@ -18,9 +24,24 @@ class User extends Authenticatable
      * @var array<int, string>
      */
     protected $fillable = [
+        'userId',
         'name',
+        'username',
         'email',
+        'github_id',
+        'google_id',
+        'discord_id',
+        'reddit_id',
         'password',
+        'phone',
+        'gender',
+        'dob',
+        'coin',
+        'status',
+        'coinUsed',
+        'avatarPath',
+        'email_verified_at',
+        'otp_code'
     ];
 
     /**
@@ -34,15 +55,33 @@ class User extends Authenticatable
     ];
 
     /**
-     * Get the attributes that should be cast.
+     * The attributes that should be cast.
      *
-     * @return array<string, string>
+     * @var array<string, string>
      */
-    protected function casts(): array
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+        'dob' => 'date',
+        'password' => 'hashed',
+    ];
+
+    public function coupon(): BelongsToMany
     {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
+        return $this->belongsToMany(Coupon::class, 'user_coupon', 'user_id', 'coupon_id');
+    }
+
+    public function manga(): BelongsToMany
+    {
+        return $this->belongsToMany(Manga::class, 'user_manga', 'user_id', 'manga_id');
+    }
+
+    public function getJWTIdentifier()
+    {
+        return $this->getKey();
+    }
+
+    public function getJWTCustomClaims()
+    {
+        return [];
     }
 }
