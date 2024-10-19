@@ -33,7 +33,7 @@ class AuthController extends Controller
                 return response()->json($validator->errors(), 400);
             }
 
-            $otp = rand(100000, 999999);
+            $otp = 'nwm-' . rand(100000, 999999);
 
             $user = User::create([
                 'userId' => $this->generateUserId(),
@@ -47,7 +47,7 @@ class AuthController extends Controller
                 'coin' => '0',
                 'status' => '1',
                 'coinUsed' => '0',
-                'otp_code' => $otp,
+                'otp_code' => bcrypt($otp),
             ]);
 
             \Mail::to($user->email)->send(new EmailOtpVerification($otp));
@@ -67,11 +67,36 @@ class AuthController extends Controller
         }
     }
 
+    public function login(Request $request)
+    {
+        $credentials = $request->only('email', 'password');
+
+        try {
+            if (! $token = JWTAuth::attempt($credentials)) {
+                return response()->json(['error' => 'Invalid credentials'], 401);
+            }
+
+            // Get the authenticated user.
+            $user = auth()->user();
+
+            // (optional) Attach the role to the token.
+            $token = JWTAuth::fromUser($user);
+
+            return response()->json([
+                'message' => 'User successfully logged in',
+                'token' => $token,
+                'user' => $user,
+            ]);
+        } catch (JWTException $e) {
+            return response()->json(['error' => 'Could not create token'], 500);
+        }
+    }
+
     public function verification(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'email' => 'required|email|max:50',
-            'otp_code' => 'required|digits:6',
+            'otp_code' => 'required',
         ]);
 
         if ($validator->fails()) {
@@ -80,8 +105,8 @@ class AuthController extends Controller
 
         $user = User::where('email', $request->email)->first();
 
-        if (!$user || $user->otp_code != $request->otp_code) {
-            return response()->json(['message' => 'Invalid OTP or email.'], 400);
+        if (!$user || !\Hash::check($request->otp_code, $user->otp_code)) {
+            return response()->json(['message' => 'Invalid credentials'], 400);
         }
 
         $user->update([
@@ -92,6 +117,13 @@ class AuthController extends Controller
         return response()->json([
             'message' => 'User successfully verified',
         ], 200);
+    }
+
+    public function logout()
+    {
+        JWTAuth::invalidate(JWTAuth::getToken());
+
+        return response()->json(['message' => 'Successfully logged out']);
     }
 
     private function generateUserId()

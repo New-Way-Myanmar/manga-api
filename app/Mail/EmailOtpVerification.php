@@ -8,10 +8,12 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Mail\Mailables\Address;
 
 class EmailOtpVerification extends Mailable
 {
     use Queueable, SerializesModels;
+
 
     public $otp;
 
@@ -29,7 +31,8 @@ class EmailOtpVerification extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Email Verification',
+            subject: 'Email Otp Verification',
+            from: new Address('sginup@newwaymm.com', 'New Way Myanmar - Sign Up')
         );
     }
 
@@ -39,7 +42,7 @@ class EmailOtpVerification extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'email.email-otp'
+            markdown: 'email.email_otp_verification',
         );
     }
 
