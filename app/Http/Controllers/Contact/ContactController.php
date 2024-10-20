@@ -65,31 +65,5 @@ class ContactController extends Controller
 
     }
 
-    public function delete($id){
-        try{
-            // Fetch contact with given id
-            $contact = Contact::findOrFail($id);
-
-            // Delete contact
-            $contact->delete();
-
-            // success response
-            return response()->json([
-                'message' => "Contact deleted successfully"
-            ],200);
-
-        } catch(ModelNotFoundException $e){
-            // Return error if Contact not found
-            return response()->json([
-                'error' => 'Contact not found',
-                'message' => $e->getMessage()
-            ], 404);
-        } catch(\Exception $e){
-            // Return error response 
-            return response()->json([
-                'error' => 'Failed to delete contact.',
-                'message' => $e->getMessage()
-            ], 500);
-        }
-    }
+    
 }

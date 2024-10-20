@@ -21,14 +21,13 @@ Route::post('/verify-otp', [AuthController::class, 'verification']);
 Route::get('/mangas',[MangaController::class,'index']);
 // Get popular mangas
 Route::get('/mangas/popular',[MangaController::class,'getPopularMangas']);
-
 // Get latest mangas
 Route::get('/mangas/latest',[MangaController::class,'getLatestMangas']);
+
 // Get all category
 Route::get('/categories',[CategoryController::class,'index']);
 // Get mangas by category
 Route::get('/categories/{category_id}/mangas', [CategoryController::class, 'getMangasByCategory']);
-
 
 // Get all feedbacks
 Route::get('/feedbacks',[FeedbackController::class,'index']);
