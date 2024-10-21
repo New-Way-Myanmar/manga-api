@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\Auth\ProfileManagementController;
 use App\Http\Controllers\Category\CategoryController;
 use App\Http\Controllers\Contact\ContactController;
 use App\Http\Controllers\Feedback\FeedbackController;
@@ -42,3 +43,16 @@ Route::get('/contacts',[ContactController::class,'index']);
 Route::post('/contacts/store',[ContactController::class,'store']);
 // Delete contact
 Route::delete('/contacts/{id}/delete',[ContactController::class,'delete']);
+
+// Profile management 
+Route::middleware('auth:api')->group(function () {
+    // // Update profile
+    Route::post('/profile',[ProfileManagementController::class, 'updateProfile']);
+    // Verify OTP for old email
+    Route::post('/email/verify-old', [ProfileManagementController::class, 'verifyOldEmailOtp']); 
+    // Change email and send OTP to new email
+    Route::post('/email/change', [ProfileManagementController::class, 'changeEmail']);  
+    // Verify OTP for new email
+    Route::post('/email/verify-new', [ProfileManagementController::class, 'verifyNewEmailOtp']);     
+
+});
